@@ -3,14 +3,12 @@ import api from '../../api/axios';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
 
-// Affiche la date exactement comme Laravel la stocke
-// Format reçu : "2026-03-22 20:36:55" → "22 mars 2026 · 20:36"
 const fmtDate = (d) => {
   if (!d) return '—';
   const [datePart, timePart] = d.split(' ');
   if (!datePart || !timePart) return d;
   const [an, mo, jj] = datePart.split('-');
-  const [hh, mm]     = timePart.split(':');
+  const [hh, mm] = timePart.split(':');
   const mois = ['jan.','févr.','mars','avr.','mai','juin',
                  'juil.','août','sept.','oct.','nov.','déc.'][parseInt(mo, 10) - 1];
   return `${jj} ${mois} ${an} · ${hh}:${mm}`;
@@ -33,13 +31,13 @@ const PillAction = ({ type }) => {
 
 export default function Audit() {
   const [audits, setAudits] = useState([]);
-  const [stats,  setStats]  = useState({});
+  const [stats, setStats] = useState({});
   const [filter, setFilter] = useState('tous');
 
   useEffect(() => {
     api.get('/audit').then(res => {
       setAudits(res.data.audits || []);
-      setStats(res.data.stats  || {});
+      setStats(res.data.stats || {});
     });
   }, []);
 
@@ -58,8 +56,8 @@ export default function Audit() {
     { label:'N° Versement',  w:110 },
     { label:'Client',        w:120 },
     { label:'Compte',        w:80  },
-    { label:'Anc. montant',  w:105 },
-    { label:'Nouv. montant', w:110 },
+    { label:'Ancien montant',   w:105 },
+    { label:'Nouveau montant',   w:110 },
     { label:'Guichetier',    w:120 },
     { label:'Date & heure',  w:160 },
   ];
@@ -130,13 +128,20 @@ export default function Audit() {
                       <td style={{ padding:'11px 12px', fontFamily:'monospace', fontSize:12, color:'#71717A', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                         {a.n_compte}
                       </td>
-                      <td style={{ padding:'11px 12px', fontSize:13, color:'#A1A1AA' }}>
+                      
+                      {/* Solde AVANT */}
+                      <td style={{ padding:'11px 12px', fontSize:13, fontWeight:500, color:'#71717A' }}>
                         {Number(a.montant_ancien).toLocaleString('fr-FR')} Ar
                       </td>
+                      
+                      {/* Solde APRÈS */}
                       <td style={{ padding:'11px 12px', fontSize:13, fontWeight:700,
-                        color: a.type_action==='ajout' ? '#16A34A' : a.type_action==='modification' ? '#D97706' : '#DC2626' }}>
-                        {a.type_action==='suppression' ? '0' : Number(a.montant_nouv).toLocaleString('fr-FR')} Ar
+                        color: a.type_action === 'ajout' ? '#16A34A' : 
+                               a.type_action === 'modification' ? '#D97706' : 
+                               a.type_action === 'suppression' ? '#DC2626' : '#71717A' }}>
+                        {Number(a.montant_nouv).toLocaleString('fr-FR')} Ar
                       </td>
+                      
                       <td style={{ padding:'11px 12px', fontSize:12, color:'#71717A', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                         {a.utilisateur}
                       </td>
